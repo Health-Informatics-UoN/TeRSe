@@ -1,13 +1,20 @@
 using Terse.Models;
+using Terse.Services;
 
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
+var b = WebApplication.CreateBuilder(args);
 
-const string TRS_PREFIX = "ga4gh/trs/v2";
+b.Services.AddTransient<ToolClassService>();
 
-app.MapGet(TRS_PREFIX + "/service-info", () => new ServiceInfo());
+var app = b.Build();
 
-app.MapGet("/", (httpContext) =>
+const string trsPrefix = "ga4gh/trs/v2";
+
+app.MapGet(trsPrefix + "/service-info", () => new ServiceInfo());
+
+app.MapGet(trsPrefix + "/toolClasses",
+    () => app.Services.GetRequiredService<ToolClassService>().List());
+
+app.MapFallback((httpContext) =>
 {
     httpContext.Response.Redirect("/ga4gh/trs/v2/service-info");
     return Task.CompletedTask;
