@@ -1,9 +1,14 @@
+using Microsoft.AspNetCore.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Terse.Models;
 using Terse.Services;
 
 var b = WebApplication.CreateBuilder(args);
 
 b.Services.AddTransient<ToolClassService>();
+b.Services.AddTransient<ToolService>();
+b.Services.Configure<JsonOptions>(o => o.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
 
 var app = b.Build();
 
@@ -24,17 +29,17 @@ app.MapGet(trsPrefix + "/toolClasses",
 
 // Tools
 
-app.MapGet("/tools", (ToolService tools) => tools.List());
+app.MapGet(trsPrefix + "/tools", (ToolService tools) => tools.List());
 
-app.MapGet("/tools/{id}",
+app.MapGet(trsPrefix + "/tools/{id}",
     (string id, ToolService tools) => tools.Get(id));
 
 // Tool Versions
 
-app.MapGet("/tools/{id}/versions",
+app.MapGet(trsPrefix + "/tools/{id}/versions",
     (string id, ToolService tools) => tools.ListVersions(id));
 
-app.MapGet("/tools/{toolId}/versions/{versionId}",
+app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}",
     (string toolId, string versionId, ToolService tools) =>
         tools.GetVersion(toolId, versionId)); // TODO configure version?
 
@@ -42,7 +47,7 @@ app.MapGet("/tools/{toolId}/versions/{versionId}",
 
 app.MapFallback((httpContext) =>
 {
-    httpContext.Response.Redirect($"/${trsPrefix}/service-info");
+    httpContext.Response.Redirect($"/{trsPrefix}/service-info");
     return Task.CompletedTask;
 });
 
