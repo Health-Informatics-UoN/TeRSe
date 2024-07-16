@@ -45,6 +45,13 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}",
 
 // Tool Version Details
 
+app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/containerfile",
+    () => Results.NotFound(new ErrorResponse
+    {
+        Code = 404,
+        Message = "No container file ('./Dockerfile') found for this tool version"
+    }));
+
 app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/tests",
     (string type) =>
         type.Contains("cwl")

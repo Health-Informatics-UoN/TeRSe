@@ -28,8 +28,11 @@ Some features not implemented.
     - This implementation does not implement a complete registry, so does not track and store tool version information - it just serves the only version of a tool as configured.
 - Secondary descriptors are not identified
     - Similar to WorkflowHub, we care about the primary descriptor only.
-    - In practice this means the descriptors endpoint with relative paths ACTUALLY functions the same as the files endpoint with relative paths. This behaviour matches WorkflowHub.
-    - Also like WorkflowHub, making the above point true, relative paths are relative to the tool files root, NOT relative to the primary descriptor (which is technically what the spec requires)
+    - Like WorkflowHub, relative paths are relative to the tool files root, NOT relative to the primary descriptor's location (which is technically what the spec requires)
+    - In practice this means the `/descriptors` endpoint with relative paths actually can be used to return any individual file (not just descriptors) per its relative path obtained from the `/files` endpoint. This behaviour matches WorkflowHub.
 - The `/tests` endpoint is not implemented.
     - It exists, but will always return an empty document with 200 OK. This behaviour matches WorkflowHub as far as I can tell.
     - To support this additional configuration would be needed and it's not necessary for the use case that spawned this implementation.
+- The `/containerfile` endpoint is not implemented
+    - It exists but will always 404 currently.
+    - It's not necessary for the initial use case, but given time it may be worth exploring the implementation, and comparing against a real world implementation such as WorkflowHub or Dockstore.
