@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Http.Json;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Terse.Models;
 using Terse.Services;
@@ -56,7 +55,7 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/tests",
     (string type) =>
         type.Contains("cwl")
             ? Results.Ok()
-            : Results.NotFound());
+            : Terse.Results.WrongType());
 
 
 app.MapFallback(() => Results.Redirect($"/{trsPrefix}/service-info"));
