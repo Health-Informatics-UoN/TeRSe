@@ -45,10 +45,13 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}",
 
 // Tool Version Details
 
-app.MapFallback((httpContext) =>
-{
-    httpContext.Response.Redirect($"/{trsPrefix}/service-info");
-    return Task.CompletedTask;
-});
+app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/tests",
+    (string type) =>
+        type.Contains("cwl")
+            ? Results.Ok()
+            : Results.NotFound());
+
+
+app.MapFallback(() => Results.Redirect($"/{trsPrefix}/service-info"));
 
 app.Run();

@@ -17,7 +17,7 @@ Some features not implemented.
 - Tool Descriptors are fixed to CWL
     - The use case that spawned this implementation (other than learning) was to provide a TRS endpoint for a single (configurable) CWL workflow. So at this time to simplify configuration and implementation, this is hardcoded.
 - Most optional response properties are omitted.
-    - This is similar to some mature implementations that choose not to engage with certain optional properties. e.g. Workflowhub.
+    - This is similar to some mature implementations that choose not to engage with certain optional properties. e.g. WorkflowHub.
     - But taken to a minimal extreme.
 - Tool IDs are irrelevant.
     - We only serve one tool, so as long as suitable configuration is provided, that tool will be served for ANY id requested.
@@ -26,4 +26,10 @@ Some features not implemented.
 - One version only
     - Similar to the above, version IDs are technically irrelevant, but are configurable for sanity.
     - This implementation does not implement a complete registry, so does not track and store tool version information - it just serves the only version of a tool as configured.
-
+- Secondary descriptors are not identified
+    - Similar to WorkflowHub, we care about the primary descriptor only.
+    - In practice this means the descriptors endpoint with relative paths ACTUALLY functions the same as the files endpoint with relative paths. This behaviour matches WorkflowHub.
+    - Also like WorkflowHub, making the above point true, relative paths are relative to the tool files root, NOT relative to the primary descriptor (which is technically what the spec requires)
+- The `/tests` endpoint is not implemented.
+    - It exists, but will always return an empty document with 200 OK. This behaviour matches WorkflowHub as far as I can tell.
+    - To support this additional configuration would be needed and it's not necessary for the use case that spawned this implementation.
