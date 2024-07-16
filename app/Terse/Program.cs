@@ -9,18 +9,40 @@ var app = b.Build();
 
 const string trsPrefix = "ga4gh/trs/v2";
 
-app.MapGet(trsPrefix + "/service-info", () => new ServiceInfo
-{
-    Id = "dev.local",
+// Service Info
 
-});
+app.MapGet(trsPrefix + "/service-info",
+    () => new ServiceInfo
+    {
+        Id = "dev.local",
+    });
+
+// Tool Classes
 
 app.MapGet(trsPrefix + "/toolClasses",
-    () => app.Services.GetRequiredService<ToolClassService>().List());
+    (ToolClassService toolClasses) => toolClasses.List());
+
+// Tools
+
+app.MapGet("/tools", (ToolService tools) => tools.List());
+
+app.MapGet("/tools/{id}",
+    (string id, ToolService tools) => tools.Get(id));
+
+// Tool Versions
+
+app.MapGet("/tools/{id}/versions",
+    (string id, ToolService tools) => tools.ListVersions(id));
+
+app.MapGet("/tools/{toolId}/versions/{versionId}",
+    (string toolId, string versionId, ToolService tools) =>
+        tools.GetVersion(toolId, versionId)); // TODO configure version?
+
+// Tool Version Details
 
 app.MapFallback((httpContext) =>
 {
-    httpContext.Response.Redirect("/ga4gh/trs/v2/service-info");
+    httpContext.Response.Redirect($"/${trsPrefix}/service-info");
     return Task.CompletedTask;
 });
 
