@@ -9,7 +9,11 @@ var app = b.Build();
 
 const string trsPrefix = "ga4gh/trs/v2";
 
-app.MapGet(trsPrefix + "/service-info", () => new ServiceInfo());
+app.MapGet(trsPrefix + "/service-info", () => new ServiceInfo
+{
+    Id = "dev.local",
+
+});
 
 app.MapGet(trsPrefix + "/toolClasses",
     () => app.Services.GetRequiredService<ToolClassService>().List());
