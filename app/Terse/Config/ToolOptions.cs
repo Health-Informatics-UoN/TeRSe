@@ -21,4 +21,14 @@ public class ToolOptions
     /// Version identifier for the files being served
     /// </summary>
     public string Version { get; set; } = "1";
+
+    /// <summary>
+    /// The Organization that published the tool
+    /// </summary>
+    public string? Organization { get; set; }
+
+    /// <summary>
+    /// Optional, to include as an alias to record the original source/id of the workflow, e.g. a WorkflowHub URL
+    /// </summary>
+    public string? OriginalAlias { get; set; }
 }

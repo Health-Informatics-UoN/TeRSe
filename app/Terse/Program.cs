@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Json;
 using System.Text.Json.Serialization;
 using Terse.Config;
@@ -34,19 +35,19 @@ app.MapGet(trsPrefix + "/toolClasses",
 
 // Tools
 
-app.MapGet(trsPrefix + "/tools", (ToolService tools) => tools.List());
+app.MapGet(trsPrefix + "/tools", (HttpContext context, ToolService tools) => tools.List(context.Request.GetDisplayUrl()));
 
 app.MapGet(trsPrefix + "/tools/{id}",
-    (string id, ToolService tools) => tools.Get(id));
+    (HttpContext context, string id, ToolService tools) => tools.Get(id, context.Request.GetDisplayUrl()));
 
 // Tool Versions
 
 app.MapGet(trsPrefix + "/tools/{id}/versions",
-    (string id, ToolService tools) => tools.ListVersions(id));
+    (HttpContext context, string id, ToolService tools) => tools.ListVersions(id, context.Request.GetDisplayUrl()));
 
 app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}",
-    (string toolId, string versionId, ToolService tools) =>
-        tools.GetVersion(toolId, versionId)); // TODO: configure version?
+    (HttpContext context, string toolId, string versionId, ToolService tools) =>
+        tools.GetVersion(toolId, versionId, context.Request.GetDisplayUrl()));
 
 // Tool Version Details
 
@@ -67,7 +68,6 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/files",
     (string toolId, string versionId, string type, string? format, ToolFilesService files) =>
         type.Contains("cwl")
             ? Results.Ok(
-                // TODO: Service
                 format == "zip"
                     ? files.ArchiveAll()
                     : files.List(toolId)

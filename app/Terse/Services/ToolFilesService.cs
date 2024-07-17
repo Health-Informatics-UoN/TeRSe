@@ -26,17 +26,17 @@ public class ToolFilesService(IOptionsMonitor<ToolOptions> toolOptions, IWebHost
     {
         try
         {
-            return GetToolFiles(string.Empty).ToList();
+            return GetToolFiles().ToList();
         }
         catch (KeyNotFoundException e)
         {
-            throw new AggregateException(
+            throw new KeyNotFoundException(
                 "The requested tool does not exist in the registry. Check tool configuration.", e);
         }
     }
 
 
-    public IEnumerable<ToolFile> GetToolFiles(string path)
+    public IEnumerable<ToolFile> GetToolFiles(string path = "")
     {
         var directoryContents = _toolRootFileProvider.GetDirectoryContents(path);
         if (!directoryContents.Exists || directoryContents is NotFoundDirectoryContents)

@@ -1,40 +1,52 @@
-using System.Text.Json.Serialization;
+using Microsoft.Extensions.Options;
+using Terse.Config;
+using Terse.Constants;
 using Terse.Models;
 
 namespace Terse.Services;
 
-public class ToolService
+public class ToolService(IOptionsMonitor<ToolOptions> toolOptions, ToolFilesService toolFiles)
 {
-    // TODO: handle not found?
-    // TODO: support query parameter filters
-    public List<Tool> List() => [Get("1")];
 
+    private readonly ToolOptions _toolOptions = toolOptions.CurrentValue;
 
-    // TODO: if config is missing, throw KeyNotFound?
-    public Tool Get(string id) => new()
+    public List<Tool> List(string baseUrl)
     {
-        Id = id,
-        Url = "", // TODO: may need to tell the service about the incoming request...
-        Organization = "", // TODO from config?
-        Aliases = [], // TODO: can use this to retain original source url e.g. workflowhub, if we add TRS to Hutch
-        Versions = [
-            new() {
-                Id = "x", // TODO: config?
-                Url = "", // TODO: may need to tell the service about the incoming request...
-                DescriptorType = ["CWL"] // fix to CWL for now? TODO config?
-            }
-        ]
-    };
+        try
+        {
+            var id = "1";
+            return [Get(id, $"{baseUrl}/{id}")]; // TODO: join URL safely
+        }
+        catch (KeyNotFoundException)
+        {
+            return [];
+        }
+    }
 
-
-    // TODO correctly match configured version only, 404 if not?
-    public ToolVersion GetVersion(string toolId, string versionId) => new()
+    public Tool Get(string id, string baseUrl)
     {
-        Id = "x", // TODO: config?
-        Url = "", // TODO: may need to tell the service about the incoming request...
-        DescriptorType = ["CWL"] // fix to CWL for now? TODO config?
-    };
+        var files = toolFiles.GetToolFiles();
 
-    // TODO: correctly match configured version only?
-    public List<ToolVersion> ListVersions(string toolId) => [GetVersion(toolId, "")];
+        if (files.All(x => x.FileType != ToolFileTypes.PRIMARY_DESCRIPTOR))
+            throw new KeyNotFoundException(
+                "The requested tool does not exist in the registry. Check tool configuration to ensure Primary Descriptor path is correct.");
+
+        return new()
+        {
+            Id = id,
+            Url = baseUrl,
+            Organization = _toolOptions.Organization ?? string.Empty,
+            Aliases = _toolOptions.OriginalAlias is null ? [] : [_toolOptions.OriginalAlias],
+            Versions = [GetVersion(id, _toolOptions.Version, $"{baseUrl}/versions/{_toolOptions.Version}")] // TODO: join URL safely
+        };
+    }
+
+    public ToolVersion GetVersion(string toolId, string versionId, string url) => versionId == _toolOptions.Version ? new()
+    {
+        Id = versionId,
+        Url = url,
+        DescriptorType = ["CWL"] // fix to CWL for now
+    } : throw new KeyNotFoundException("The requested version does not exist in the registry.");
+
+    public List<ToolVersion> ListVersions(string toolId, string baseUrl) => [GetVersion(toolId, _toolOptions.Version, $"{baseUrl}/{_toolOptions.Version}")]; // TODO: join URL safely
 }
