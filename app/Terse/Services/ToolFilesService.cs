@@ -28,7 +28,7 @@ public class ToolFilesService(IOptionsMonitor<ToolOptions> toolOptions, IWebHost
             foreach (var f in GetToolFiles())
             {
                 var fileInfo = _toolRootFileProvider.GetFileInfo(f.Path);
-                zipBuilder.AddFile(fileInfo.PhysicalPath, f.Path); // TODO: does this work or should we get bytes via the IFileInfo?
+                zipBuilder.AddFile(fileInfo.PhysicalPath, f.Path);
             };
         }
         catch (KeyNotFoundException e)
@@ -38,6 +38,22 @@ public class ToolFilesService(IOptionsMonitor<ToolOptions> toolOptions, IWebHost
         }
 
         return zipBuilder.AsByteArray();
+    }
+
+    public DescriptorFile GetPrimaryDescriptor(string toolId, string versionId) =>
+        GetDescriptor(_toolOptions.PrimaryDescriptorPath);
+
+    private DescriptorFile GetDescriptor(string path)
+    {
+        var f = _toolRootFileProvider.GetFileInfo(path);
+        if (!f.Exists) throw new KeyNotFoundException("The requested descriptor could not be found for this tool version");
+
+        using var streamReader = new StreamReader(f.CreateReadStream(), System.Text.Encoding.UTF8);
+
+        return new()
+        {
+            Content = streamReader.ReadToEnd(),
+        };
     }
 
     public List<ToolFile> List(string id)
