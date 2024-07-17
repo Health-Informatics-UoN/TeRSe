@@ -1,6 +1,7 @@
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using Terse.Config;
+using Terse.Constants;
 using Terse.Models;
 using UoN.ZipBuilder;
 
@@ -79,7 +80,7 @@ public class ToolFilesService(IOptionsMonitor<ToolOptions> toolOptions, IWebHost
 
         foreach (var file in directoryContents)
         {
-            if(_settings.MaskRoCrates && file.Name == "ro-crate-metadata.json") continue; // TODO: what about a rename?
+            if (_settings.MaskRoCrates && file.Name == "ro-crate-metadata.json") continue; // TODO: what about a rename?
 
             if (file.IsDirectory)
             {
@@ -96,7 +97,7 @@ public class ToolFilesService(IOptionsMonitor<ToolOptions> toolOptions, IWebHost
                 yield return new ToolFile
                 {
                     Path = fileRelativePath,
-                    FileType = fileRelativePath == _toolOptions.PrimaryDescriptorPath ? "PRIMARY_DESCRIPTOR" : "OTHER", // TODO: stop using magic strings <3
+                    FileType = fileRelativePath == _toolOptions.PrimaryDescriptorPath ? ToolFileTypes.PRIMARY_DESCRIPTOR : ToolFileTypes.OTHER,
                 };
             }
         }
