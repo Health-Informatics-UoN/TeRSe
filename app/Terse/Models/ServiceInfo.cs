@@ -2,7 +2,7 @@ namespace Terse.Models;
 
 public class ServiceInfo
 {
-    public string ContactUrl { get; set; } = string.Empty; // TODO
+    public string ContactUrl { get; set; } = string.Empty; // TODO:
 
     public string Description { get; set; } = "Terse. A minimal TRS API for a single workflow.";
     public string DocumentationUrl { get; set; } = "https://editor.swagger.io/?url=https://raw.githubusercontent.com/ga4gh/tool-registry-service-schemas/release/v2.0.1/openapi/openapi.yaml";

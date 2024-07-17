@@ -1,13 +1,19 @@
 using Microsoft.AspNetCore.Http.Json;
 using System.Text.Json.Serialization;
+using Terse.Config;
 using Terse.Models;
 using Terse.Services;
 
 var b = WebApplication.CreateBuilder(args);
 
+b.Services.Configure<JsonOptions>(o => o.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
+
+b.Services.Configure<ToolOptions>(b.Configuration.GetRequiredSection("Tool"));
+
 b.Services.AddTransient<ToolClassService>();
 b.Services.AddTransient<ToolService>();
-b.Services.Configure<JsonOptions>(o => o.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
+b.Services.AddTransient<ToolFilesService>();
+
 
 var app = b.Build();
 
@@ -40,7 +46,7 @@ app.MapGet(trsPrefix + "/tools/{id}/versions",
 
 app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}",
     (string toolId, string versionId, ToolService tools) =>
-        tools.GetVersion(toolId, versionId)); // TODO configure version?
+        tools.GetVersion(toolId, versionId)); // TODO: configure version?
 
 // Tool Version Details
 
@@ -55,6 +61,17 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/tests",
     (string type) =>
         type.Contains("cwl")
             ? Results.Ok()
+            : Terse.Results.WrongType());
+
+app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/files",
+    (string toolId, string versionId, string type, string? format, ToolFilesService files) =>
+        type.Contains("cwl")
+            ? Results.Ok(
+                // TODO: Service
+                format == "zip"
+                    ? files.ArchiveAll()
+                    : files.List(toolId)
+            )
             : Terse.Results.WrongType());
 
 

@@ -15,7 +15,7 @@ public class ToolVersion
     [JsonPropertyName("is_production")]
     public string? IsProduction { get; set; }
 
-    public List<string>? Images { get; set; } = []; // TODO model type for ImageData
+    public List<string>? Images { get; set; } = []; // TODO: model type for ImageData
 
     [JsonPropertyName("descriptor_type")]
     public List<string>? DescriptorType { get; set; }

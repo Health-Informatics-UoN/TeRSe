@@ -36,3 +36,5 @@ Some features not implemented.
 - The `/containerfile` endpoint is not implemented
     - It exists but will always 404 currently.
     - It's not necessary for the initial use case, but given time it may be worth exploring the implementation, and comparing against a real world implementation such as WorkflowHub or Dockstore.
+- We don't currently generate file checksums
+    - WorkflowHub doesn't either, even though it's a production service and this is a development / utility implementation :)
