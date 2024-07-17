@@ -38,16 +38,57 @@ app.MapGet(trsPrefix + "/toolClasses",
 app.MapGet(trsPrefix + "/tools", (HttpContext context, ToolService tools) => tools.List(context.Request.GetDisplayUrl()));
 
 app.MapGet(trsPrefix + "/tools/{id}",
-    (HttpContext context, string id, ToolService tools) => tools.Get(id, context.Request.GetDisplayUrl()));
+    (HttpContext context, string id, ToolService tools) =>
+    {
+        try
+        {
+            return Results.Ok(tools.Get(id, context.Request.GetDisplayUrl()));
+        }
+        catch (KeyNotFoundException e)
+        {
+            return Results.NotFound(new ErrorResponse
+            {
+                Code = 404,
+                Message = e.Message
+            });
+        }
+    });
 
 // Tool Versions
 
 app.MapGet(trsPrefix + "/tools/{id}/versions",
-    (HttpContext context, string id, ToolService tools) => tools.ListVersions(id, context.Request.GetDisplayUrl()));
+    (HttpContext context, string id, ToolService tools) =>
+    {
+        try
+        {
+            return Results.Ok(tools.ListVersions(id, context.Request.GetDisplayUrl()));
+        }
+        catch (KeyNotFoundException e)
+        {
+            return Results.NotFound(new ErrorResponse
+            {
+                Code = 404,
+                Message = e.Message
+            });
+        }
+    });
 
 app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}",
     (HttpContext context, string toolId, string versionId, ToolService tools) =>
-        tools.GetVersion(toolId, versionId, context.Request.GetDisplayUrl()));
+        {
+            try
+            {
+                return Results.Ok(tools.GetVersion(toolId, versionId, context.Request.GetDisplayUrl()));
+            }
+            catch (KeyNotFoundException e)
+            {
+                return Results.NotFound(new ErrorResponse
+                {
+                    Code = 404,
+                    Message = e.Message
+                });
+            }
+        });
 
 // Tool Version Details
 
@@ -66,13 +107,26 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/tests",
 
 app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/files",
     (string toolId, string versionId, string type, string? format, ToolFilesService files) =>
-        type.Contains("cwl")
-            ? Results.Ok(
-                format == "zip"
-                    ? files.ArchiveAll()
-                    : files.List(toolId)
-            )
-            : Terse.Results.WrongType());
+        {
+            try
+            {
+                return type.Contains("cwl")
+                    ? Results.Ok(
+                        format == "zip"
+                            ? files.ArchiveAll()
+                            : files.List(toolId)
+                    )
+                    : Terse.Results.WrongType();
+            }
+            catch (KeyNotFoundException e)
+            {
+                return Results.NotFound(new ErrorResponse
+                {
+                    Code = 404,
+                    Message = e.Message
+                });
+            }
+        });
 
 
 app.MapFallback(() => Results.Redirect($"/{trsPrefix}/service-info"));
