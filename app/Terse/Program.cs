@@ -46,11 +46,7 @@ app.MapGet(trsPrefix + "/tools/{id}",
         }
         catch (KeyNotFoundException e)
         {
-            return Results.NotFound(new ErrorResponse
-            {
-                Code = 404,
-                Message = e.Message
-            });
+            return Terse.Results.NotFound(e);
         }
     });
 
@@ -65,11 +61,7 @@ app.MapGet(trsPrefix + "/tools/{id}/versions",
         }
         catch (KeyNotFoundException e)
         {
-            return Results.NotFound(new ErrorResponse
-            {
-                Code = 404,
-                Message = e.Message
-            });
+            return Terse.Results.NotFound(e);
         }
     });
 
@@ -82,22 +74,14 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}",
             }
             catch (KeyNotFoundException e)
             {
-                return Results.NotFound(new ErrorResponse
-                {
-                    Code = 404,
-                    Message = e.Message
-                });
+                return Terse.Results.NotFound(e);
             }
         });
 
 // Tool Version Details
 
 app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/containerfile",
-    () => Results.NotFound(new ErrorResponse
-    {
-        Code = 404,
-        Message = "No container file ('./Dockerfile') found for this tool version"
-    }));
+    () => Terse.Results.NotFound("No container file ('./Dockerfile') found for this tool version"));
 
 app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/tests",
     (string type) =>
@@ -111,20 +95,14 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/files",
             try
             {
                 return type.Contains("cwl")
-                    ? Results.Ok(
-                        format == "zip"
-                            ? files.ArchiveAll()
-                            : files.List(toolId)
-                    )
+                    ? format == "zip"
+                        ? Results.File(files.ArchiveAll(), "application/zip", $"workflow-{toolId}-{versionId}.zip") // TODO: add crate if crate
+                        : Results.Ok(files.List(toolId))
                     : Terse.Results.WrongType();
             }
             catch (KeyNotFoundException e)
             {
-                return Results.NotFound(new ErrorResponse
-                {
-                    Code = 404,
-                    Message = e.Message
-                });
+                return Terse.Results.NotFound(e);
             }
         });
 

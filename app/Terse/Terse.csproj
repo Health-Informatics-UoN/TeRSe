@@ -10,4 +10,8 @@
     <Folder Include="Models/" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="UoN.ZipBuilder" Version="1.1.0" />
+  </ItemGroup>
+
 </Project>
