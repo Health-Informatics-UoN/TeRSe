@@ -41,9 +41,9 @@ public class ToolFilesService(IOptionsMonitor<ToolOptions> toolOptions, IWebHost
     }
 
     public DescriptorFile GetPrimaryDescriptor(string toolId, string versionId) =>
-        GetDescriptor(_toolOptions.PrimaryDescriptorPath);
+        GetDescriptor(toolId, versionId, _toolOptions.PrimaryDescriptorPath);
 
-    private DescriptorFile GetDescriptor(string path)
+    public DescriptorFile GetDescriptor(string toolId, string versionId, string path)
     {
         var f = _toolRootFileProvider.GetFileInfo(path);
         if (!f.Exists) throw new KeyNotFoundException("The requested descriptor could not be found for this tool version");

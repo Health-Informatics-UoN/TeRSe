@@ -122,6 +122,22 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/descriptor",
         catch (KeyNotFoundException e) { return Terse.Results.NotFound(e); }
     });
 
+app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/descriptor/{**path}",
+    (string toolId, string versionId, string type, string path, ToolFilesService files) =>
+    {
+        try
+        {
+            if (!type.Contains("cwl")) return Terse.Results.WrongType();
+
+            var descriptor = files.GetDescriptor(toolId, versionId, path);
+
+            return type.Contains("plain")
+                ? Results.Text(descriptor.Content)
+                : Results.Ok(descriptor);
+        }
+        catch (KeyNotFoundException e) { return Terse.Results.NotFound(e); }
+    });
+
 app.MapFallback(() => Results.Redirect($"/{trsPrefix}/service-info"));
 
 app.Run();
