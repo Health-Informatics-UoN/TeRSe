@@ -6,9 +6,10 @@ using UoN.ZipBuilder;
 
 namespace Terse.Services;
 
-public class ToolFilesService(IOptionsMonitor<ToolOptions> toolOptions, IWebHostEnvironment env)
+public class ToolFilesService(IOptionsMonitor<ToolOptions> toolOptions, IWebHostEnvironment env, IOptionsMonitor<AppSettings> settings)
 {
     private readonly ToolOptions _toolOptions = toolOptions.CurrentValue;
+    private readonly AppSettings _settings = settings.CurrentValue;
 
     private readonly PhysicalFileProvider _toolRootFileProvider = Path.IsPathRooted(toolOptions.CurrentValue.RootPath)
         ? new PhysicalFileProvider(toolOptions.CurrentValue.RootPath)
@@ -78,6 +79,8 @@ public class ToolFilesService(IOptionsMonitor<ToolOptions> toolOptions, IWebHost
 
         foreach (var file in directoryContents)
         {
+            if(_settings.MaskRoCrates && file.Name == "ro-crate-metadata.json") continue; // TODO: what about a rename?
+
             if (file.IsDirectory)
             {
                 // recursively call GetFiles and return each one
@@ -95,30 +98,6 @@ public class ToolFilesService(IOptionsMonitor<ToolOptions> toolOptions, IWebHost
                     Path = fileRelativePath,
                     FileType = fileRelativePath == _toolOptions.PrimaryDescriptorPath ? "PRIMARY_DESCRIPTOR" : "OTHER", // TODO: stop using magic strings <3
                 };
-            }
-        }
-    }
-
-    public IEnumerable<IFileInfo> GetToolFileInfo(string path = "")
-    {
-        var directoryContents = _toolRootFileProvider.GetDirectoryContents(path);
-        if (!directoryContents.Exists || directoryContents is NotFoundDirectoryContents)
-            throw new KeyNotFoundException();
-
-        foreach (var file in directoryContents)
-        {
-            if (file.IsDirectory)
-            {
-                // recursively call GetFiles and return each one
-                // file.Name is the directory name alone (eg. images)
-                foreach (var f in GetToolFileInfo(Path.Combine(path, file.Name)))
-                {
-                    yield return f;
-                }
-            }
-            else
-            {
-                yield return file;
             }
         }
     }

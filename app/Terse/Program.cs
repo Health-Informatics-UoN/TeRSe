@@ -9,6 +9,7 @@ var b = WebApplication.CreateBuilder(args);
 
 b.Services.Configure<JsonOptions>(o => o.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull);
 
+b.Services.Configure<AppSettings>(b.Configuration);
 b.Services.Configure<ToolOptions>(b.Configuration.GetRequiredSection("Tool"));
 
 b.Services.AddTransient<ToolClassService>();
