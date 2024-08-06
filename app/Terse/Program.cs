@@ -86,7 +86,7 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/containerfile",
 
 app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/tests",
     (string type) =>
-        type.Contains("cwl")
+        type.Contains("cwl", StringComparison.InvariantCultureIgnoreCase)
             ? Results.Ok()
             : Terse.Results.WrongType());
 
@@ -95,7 +95,7 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/files",
         {
             try
             {
-                return type.Contains("cwl")
+                return type.Contains("cwl", StringComparison.InvariantCultureIgnoreCase)
                     ? format == "zip"
                         ? Results.File(files.ArchiveAll(), "application/zip", $"workflow-{toolId}-{versionId}.zip") // TODO: add crate if crate
                         : Results.Ok(files.List(toolId))
@@ -112,11 +112,11 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/descriptor",
     {
         try
         {
-            if (!type.Contains("cwl")) return Terse.Results.WrongType();
+            if (!type.Contains("cwl", StringComparison.InvariantCultureIgnoreCase)) return Terse.Results.WrongType();
 
             var descriptor = files.GetPrimaryDescriptor(toolId, versionId);
 
-            return type.Contains("plain")
+            return type.Contains("plain", StringComparison.InvariantCultureIgnoreCase)
                 ? Results.Text(descriptor.Content)
                 : Results.Ok(descriptor);
         }
@@ -128,17 +128,17 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/descriptor/{
     {
         try
         {
-            if (!type.Contains("cwl")) return Terse.Results.WrongType();
+            if (!type.Contains("cwl", StringComparison.InvariantCultureIgnoreCase)) return Terse.Results.WrongType();
 
             var descriptor = files.GetDescriptor(toolId, versionId, path);
 
-            return type.Contains("plain")
+            return type.Contains("plain", StringComparison.InvariantCultureIgnoreCase)
                 ? Results.Text(descriptor.Content)
                 : Results.Ok(descriptor);
         }
         catch (KeyNotFoundException e) { return Terse.Results.NotFound(e); }
     });
 
-app.MapFallback(() => Results.Redirect($"/{trsPrefix}/service-info"));
+app.MapGet("/", () => Results.Redirect($"/{trsPrefix}/service-info"));
 
 app.Run();
