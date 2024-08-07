@@ -16,8 +16,11 @@ b.Services.AddTransient<ToolClassService>();
 b.Services.AddTransient<ToolService>();
 b.Services.AddTransient<ToolFilesService>();
 
+b.Services.AddHttpLogging(o => { });
 
 var app = b.Build();
+
+app.UseHttpLogging();
 
 const string trsPrefix = "ga4gh/trs/v2";
 
@@ -108,7 +111,7 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/files",
         });
 
 app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/descriptor",
-    (string toolId, string versionId, string type, ToolFilesService files) =>
+    (HttpContext context, string toolId, string versionId, string type, ToolFilesService files) =>
     {
         try
         {
@@ -116,7 +119,10 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/descriptor",
 
             var descriptor = files.GetPrimaryDescriptor(toolId, versionId);
 
-            return type.Contains("plain", StringComparison.InvariantCultureIgnoreCase)
+            var isPlain = type.Contains("plain", StringComparison.InvariantCultureIgnoreCase) ||
+                context.Request.Headers.Accept == "text/plain";
+
+            return isPlain
                 ? Results.Text(descriptor.Content)
                 : Results.Ok(descriptor);
         }
@@ -124,7 +130,7 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/descriptor",
     });
 
 app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/descriptor/{**path}",
-    (string toolId, string versionId, string type, string path, ToolFilesService files) =>
+    (HttpContext context, string toolId, string versionId, string type, string path, ToolFilesService files) =>
     {
         try
         {
@@ -132,7 +138,10 @@ app.MapGet(trsPrefix + "/tools/{toolId}/versions/{versionId}/{type}/descriptor/{
 
             var descriptor = files.GetDescriptor(toolId, versionId, path);
 
-            return type.Contains("plain", StringComparison.InvariantCultureIgnoreCase)
+            var isPlain = type.Contains("plain", StringComparison.InvariantCultureIgnoreCase) ||
+                context.Request.Headers.Accept == "text/plain";
+
+            return isPlain
                 ? Results.Text(descriptor.Content)
                 : Results.Ok(descriptor);
         }
